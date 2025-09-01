@@ -1,0 +1,107 @@
+Base de datos editoriales
+DROP DATABASE IF EXISTS editoriales;
+CREATE DATABASE editoriales;
+USE editoriales;
+
+
+CREATE TABLE editoriales (
+    id_editorial INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_editorial VARCHAR(100) NOT NULL
+);
+
+
+CREATE TABLE empleados (
+    id_empleado INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_empleado VARCHAR(100) NOT NULL,
+    id_editorial INT,
+    FOREIGN KEY (id_editorial) 
+        REFERENCES editoriales(id_editorial)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+
+CREATE TABLE libros (
+    id_libro INT AUTO_INCREMENT PRIMARY KEY,
+    titulo_libro VARCHAR(255) NOT NULL,
+    id_editorial INT,
+    FOREIGN KEY (id_editorial) 
+        REFERENCES editoriales(id_editorial)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
+
+INSERT INTO editoriales (id_editorial, nombre_editorial)
+VALUES
+    (1, 'Editorial Planeta'),
+    (2, 'Editorial Santillana'),
+    (3, 'Editorial Anaya'),
+    (4, 'Editorial Alfaguara'),
+    (5, 'Editorial SM'),
+    (6, 'Editorial Fondo de Cultura Económica'),
+    (7, 'Editorial Siglo XXI'),
+    (8, 'Editorial Cátedra'),
+    (9, 'Editorial Tecnos'),
+    (10, 'Editorial Ariel');
+
+SELECT * FROM editoriales;
+INSERT INTO empleados (id_empleado, nombre_empleado, id_editorial)
+VALUES
+    (1, 'Juan Pérez', 1),
+    (2, 'María Rodríguez', 1),
+    (3, 'Pedro López', 2),
+    (4, 'Ana Martínez', 2),
+    (5, 'Carlos García', 3),
+    (6, 'Laura González', 3),
+    (7, 'Luis Fernández', 4),
+    (8, 'Elena Sánchez', 4),
+    (9, 'Javier Ruiz', 5),
+    (10, 'Sofía Torres', 5);
+
+
+INSERT INTO libros (id_libro, titulo_libro, id_editorial)
+VALUES
+    (1, 'Cien años de soledad', 1),
+    (2, 'Don Quijote de la Mancha', 1),
+    (3, 'La sombra del viento', 2),
+    (4, 'Rayuela', 2),
+    (5, 'Crónica de una muerte anunciada', 3),
+    (6, 'Los detectives salvajes', 3),
+    (7, 'Ficciones', 4),
+    (8, 'La casa de los espíritus', 4),
+    (9, 'La ciudad y los perros', 5),
+    (10, 'Cien años de soledad', 5);
+
+select* from empleados;
+select * from editoriales;
+select * from libros;
+
+DELETE FROM editoriales
+WHERE id_editorial = 2;
+
+UPDATE editoriales
+SET nombre_editorial = 'La mejor Editorial S.A'
+WHERE id_editorial = 8;
+
+DELETE FROM  empleados
+WHERE id_empleado = 7;
+-- Actualizar el nombre de un empleado: 
+UPDATE empleados 
+SET nombre_empleado = 'Roberto Funes'
+WHERE id_empleado = 8;
+
+-- Eliminar un libro
+DELETE FROM  libros
+WHERE id_libro = 10;
+
+UPDATE libros
+SET id_editorial = 3
+WHERE id_libro = 5;
+
+DELETE FROM editoriales
+WHERE id_editorial = 4;
+
+
+
+
+
