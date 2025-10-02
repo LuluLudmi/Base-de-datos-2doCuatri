@@ -1,0 +1,130 @@
+----DDL----
+DROP DATABASE IF EXISTS Armado_TV;
+CREATE DATABASE IF NOT EXISTS Armado_TV;
+USE Armado_TV;
+CREATE TABLE Importador (
+    ID_Importador INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre_Importador VARCHAR(100) NOT NULL,
+    Direccion VARCHAR(255),
+    Telefono VARCHAR(20)
+);
+CREATE TABLE Operario (
+    ID_Operario INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre VARCHAR(50) NOT NULL,
+    Apellido VARCHAR(50) NOT NULL,
+    DNI VARCHAR(20) UNIQUE NOT NULL
+);
+CREATE TABLE Modelo_Televisor (
+    ID_Modelo INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre_Modelo VARCHAR(100) UNIQUE NOT NULL,
+    Dimensiones VARCHAR(50),
+    Precio_Venta DECIMAL(10, 2)
+);
+CREATE TABLE Pieza (
+    ID_Pieza INT AUTO_INCREMENT PRIMARY KEY,
+    Nombre_Pieza VARCHAR(100) NOT NULL,
+    Descripcion VARCHAR(255),
+    Stock_Actual INT NOT NULL DEFAULT 0 CHECK (Stock_Actual >= 0)
+);
+CREATE TABLE Factura (
+    Nro_Factura VARCHAR(50) PRIMARY KEY,
+    ID_Importador INT NOT NULL,
+    ID_Pieza INT NOT NULL,
+    Fecha_Compra DATE NOT NULL,
+    Cantidad_Comprada INT NOT NULL,
+    Monto_Total DECIMAL(12, 2) NOT NULL,
+    FOREIGN KEY (ID_Importador) REFERENCES Importador(ID_Importador),
+    FOREIGN KEY (ID_Pieza) REFERENCES Pieza(ID_Pieza)
+);
+--  Tabla de Relación Fabricacion_Registro (Pieza Fabricada)
+-- "el operario completa una hoja de confección con las la fecha y la cantidad fabricada."
+CREATE TABLE Fabricacion_Registro (
+    ID_Registro INT AUTO_INCREMENT PRIMARY KEY,
+    ID_Pieza INT NOT NULL,
+    ID_Operario INT NOT NULL,
+    Fecha_Fabricacion DATE NOT NULL,
+    Cantidad_Fabricada INT NOT NULL CHECK (Cantidad_Fabricada > 0),
+    FOREIGN KEY (ID_Pieza) REFERENCES Pieza(ID_Pieza),
+    FOREIGN KEY (ID_Operario) REFERENCES Operario(ID_Operario) -- NOTA: Una Pieza puede ser fabricada por más de un Operario (N:M)
+);
+--  Tabla de Relación Pieza_Modelo (Composición del Televisor - Mapa de Armado)
+-- "Los diferentes modelos de televisores están compuestos por 300 o más piezas,
+-- aunque una pieza puede estar incorporada en más de un televisor" (Relación N:M).
+CREATE TABLE Pieza_Modelo (
+    ID_Modelo INT NOT NULL,
+    ID_Pieza INT NOT NULL,
+    Ubicacion_Armado VARCHAR(50) NOT NULL,
+    Orden_Armado INT NOT NULL,
+    PRIMARY KEY (ID_Modelo, ID_Pieza),
+    FOREIGN KEY (ID_Modelo) REFERENCES Modelo_Televisor(ID_Modelo),
+    FOREIGN KEY (ID_Pieza) REFERENCES Pieza(ID_Pieza)
+);
+----DML----
+NSERT INTO Importador (Nombre_Importador, Direccion, Telefono)
+VALUES ('Tech Imports SRL', 'Río Grande 345', '42-1111'),
+    ('Global Supplies SA', 'Ushuaia 101', '43-2222');
+INSERT INTO Operario (Nombre, Apellido, DNI)
+VALUES ('Ana', 'Perez', '30123456'),
+    ('Carlos', 'Ruiz', '25678901');
+INSERT INTO Modelo_Televisor (Nombre_Modelo, Dimensiones, Precio_Venta)
+VALUES ('Smart LED X10', '50 Pulgadas', 350000.00),
+    ('OLED Ultra Z5', '65 Pulgadas', 780000.00);
+INSERT INTO Pieza (Nombre_Pieza, Descripcion, Stock_Actual)
+VALUES (
+        'Placa T-Con 50"',
+        'Placa controladora de imagen',
+        150
+    ),
+    ('Chipset HDMI 2.1', 'Chip de importación', 500),
+    (
+        'Base Soporte Universal',
+        'Base de plástico inyectado',
+        300
+    );
+INSERT INTO Factura (
+        Nro_Factura,
+        ID_Importador,
+        ID_Pieza,
+        Fecha_Compra,
+        Cantidad_Comprada,
+        Monto_Total
+    )
+VALUES ('F-2025-001', 1, 2, '2025-09-20', 100, 80000.00),
+    ('F-2025-002', 2, 3, '2025-09-21', 200, 60000.00);
+INSERT INTO Fabricacion_Registro (
+        ID_Pieza,
+        ID_Operario,
+        Fecha_Fabricacion,
+        Cantidad_Fabricada
+    )
+VALUES (1, 1, '2025-10-01', 50),
+    (1, 2, '2025-10-02', 40);
+INSERT INTO Pieza_Modelo (
+        ID_Modelo,
+        ID_Pieza,
+        Ubicacion_Armado,
+        Orden_Armado
+    )
+VALUES (1, 1, 'Panel Central', 10),
+    (1, 2, 'Entrada Derecha', 20),
+    (2, 2, 'Entrada Izquierda', 30);
+----QUERIES---
+SELECT MT.Nombre_Modelo,
+    P.Nombre_Pieza,
+    PM.Ubicacion_Armado,
+    PM.Orden_Armado
+FROM Modelo_Televisor AS MT
+    JOIN Pieza_Modelo AS PM ON MT.ID_Modelo = PM.ID_Modelo
+    JOIN Pieza AS P ON PM.ID_Pieza = P.ID_Pieza
+WHERE MT.Nombre_Modelo = 'Smart LED X10'
+ORDER BY PM.Orden_Armado ASC;
+SELECT P.Nombre_Pieza,
+    COUNT(DISTINCT FR.ID_Operario) AS 'Cantidad_Operarios'
+FROM Pieza AS P
+    JOIN Fabricacion_Registro AS FR ON P.ID_Pieza = FR.ID_Pieza
+GROUP BY P.Nombre_Pieza
+HAVING Cantidad_Operarios > 1;
+SHOW TABLES;
+DESCRIBE Pieza;
+SELECT *
+FROM Pieza;
