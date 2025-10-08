@@ -1,0 +1,32 @@
+-- Ejercicio 1:
+USE editoriales;
+CREATE INDEX idx_libros_id_editorial_titulo ON libros (id_editorial, titulo);
+SHOW INDEX
+FROM libros;    
+-- Ejercicio 2:
+CREATE INDEX idx_libros_fecha_publicacion ON libros (fecha_publicacion);
+SHOW INDEX
+FROM libros;
+-- Ejercicio 3
+DROP INDEX idx_libros_id_editorial_titulo ON libros;
+SHOW INDEX
+FROM editoriales;
+--- Ejercicio 4
+-- Primero eliminamos el índice anterior
+DROP INDEX idx_libros_id_editorial_titulo ON libros;
+-- Creamos el nuevo índice único con el mismo nombre
+CREATE UNIQUE INDEX idx_libros_id_editorial_titulo ON libros (id_editorial, titulo);
+-- Ejercicio 5: 
+ALTER TABLE libros DROP INDEX idx_libros_id_editorial_titulo;
+ALTER TABLE libros ADD UNIQUE INDEX idx_libros_id_editorial_titulo(id_editorial, titulo);
+SHOW INDEX
+FROM libros;
+-- Ejercicio 6: 
+CREATE UNIQUE INDEX idx_editoriales_id_editorial ON editoriales(id_editorial);
+SHOW INDEX
+FROM editoriales;
+-- Ejercicio 7
+ALTER TABLE libros DROP PRIMARY KEY;
+ALTER TABLE libros ADD PRIMARY KEY (id_libro);
+SHOW INDEX
+FROM libros;
